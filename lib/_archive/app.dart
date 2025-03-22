@@ -1,8 +1,7 @@
 import 'package:memories/main.dart';
-import 'package:memories/settings/settings_page.dart';
+import 'package:memories/features/settings/settings_page.dart';
 
 import 'dashboard.dart';
-import 'memories/memories.dart';
 
 class App extends UI {
   @override
@@ -84,7 +83,7 @@ class App extends UI {
 
 enum Routes {
   dashboard(Icons.dashboard, 'Dashboard', const DashboardPage()),
-  memories(Icons.memory, 'Memories', MemoriesUI()),
+  // memories(Icons.memory, 'Memories', MemoriesUI()),
   settings(Icons.settings, 'Settings', const SettingsPage());
 
   const Routes(this.icon, this.name, this.page);

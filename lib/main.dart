@@ -1,31 +1,33 @@
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:forui/forui.dart';
-import 'package:memories/startup/locked_page.dart';
+import 'package:memories/api/settings_repository.dart';
+import 'package:memories/objectbox.g.dart';
+import 'package:memories/features/startup/locked_page.dart';
 import 'main.dart';
 
 export 'dart:developer' show log;
 export 'dart:io';
-export 'package:memories/memories/memory_page.dart';
+export 'package:memories/features/memories/memory_page.dart';
 export 'package:memories/_archive/memories_app.dart';
-// export 'package:states_rebuilder/states_rebuilder.dart'hide Animate;
-export 'package:manager/manager.dart' hide Animate, TextDirection;
+export 'package:states_rebuilder/states_rebuilder.dart';
+export 'package:manager/manager.dart';
 
-import 'settings/settings_bloc.dart';
-
-void main() async {
+void main() {
   FlutterNativeSplash.preserve(
     widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
   );
-  await RM.storageInitializer(HiveStorage());
-  // store = await openStore(
-  //   directory: path.join(
-  //     (await getApplicationDocumentsDirectory()).path + 'memories',
-  //   ),
-  // );
-
-  runApp(App());
+  manager(
+    App(),
+    openStore: openStore,
+  );
 }
 
-class App extends UI {
+mixin _App {
+  ThemeMode get themeMode => settignsRepository.themeMode();
+  bool get dark => true;
+}
+
+class App extends UI with _App {
   void didMountWidget(context) {
     FlutterNativeSplash.remove();
   }
@@ -37,22 +39,14 @@ class App extends UI {
       navigatorKey: navigator.navigatorKey,
       home: LockedPage(),
       builder: (context, child) => FTheme(
-        data: FThemes.yellow.dark,
+        data: dark ? FThemes.yellow.dark : FThemes.yellow.light,
         child: child!,
       ),
-      // theme: ShadThemeData(
-      //   colorScheme: ShadRedColorScheme.light(),
-      //   brightness: Brightness.light,
-      // ),
-      // darkTheme: ShadThemeData(
-      //   colorScheme: ShadRedColorScheme.dark(),
-      //   brightness: Brightness.dark,
-      // ),
-      themeMode: settingsBloc.themeMode,
+      themeMode: themeMode,
     );
   }
 }
 
-/// bloc,repo
 final navigator = RM.navigate;
-late Store store;
+
+typedef UI = ReactiveStatelessWidget;
