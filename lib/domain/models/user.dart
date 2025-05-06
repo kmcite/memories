@@ -1,28 +1,16 @@
-import 'package:memories/main.dart';
+import 'dart:convert';
 
 class User {
   String name;
   String email;
-  User({
-    this.name = '',
-    this.email = '',
-  });
+  User({this.name = '', this.email = ''});
 
-  User copyWith({
-    String? name,
-    String? email,
-  }) {
-    return User(
-      name: name ?? this.name,
-      email: email ?? this.email,
-    );
+  User copyWith({String? name, String? email}) {
+    return User(name: name ?? this.name, email: email ?? this.email);
   }
 
   Map<String, dynamic> toMap() {
-    return <String, dynamic>{
-      'name': name,
-      'email': email,
-    };
+    return <String, dynamic>{'name': name, 'email': email};
   }
 
   factory User.fromMap(Map<String, dynamic> map) {

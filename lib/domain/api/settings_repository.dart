@@ -1,25 +1,13 @@
 import 'package:memories/main.dart';
-import 'package:memories/models/settings.dart';
-import 'package:memories/models/user.dart';
+import 'package:memories/domain/models/settings.dart';
+import 'package:memories/domain/models/user.dart';
 
 final settignsRepository = SettingsRepository();
 
-class SettingsRepository {
-  final settingsRM = RM.inject(
-    () => Settings(),
-    persist: () => PersistState(
-      key: 'settings',
-      fromJson: Settings.fromJson,
-      toJson: (s) => s.toJson(),
-    ),
-  );
-
+class SettingsRepository extends Repository<Settings> {
   Settings settings([Settings? value]) {
-    if (value != null)
-      settingsRM
-        ..state = value
-        ..notify();
-    return settingsRM.state;
+    if (value != null) call(value);
+    return this.value;
   }
 
   ThemeMode themeMode([ThemeMode? value]) {
@@ -84,4 +72,7 @@ class SettingsRepository {
     }
     return user().email;
   }
+
+  @override
+  Settings get initialState => Settings();
 }

@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:8202836708141696390",
-      "lastPropertyId": "5:8930520432529112181",
+      "lastPropertyId": "11:3429793192619775892",
       "name": "Memory",
       "properties": [
         {
@@ -15,38 +15,116 @@
           "flags": 1
         },
         {
-          "id": "2:7167246905422961780",
-          "name": "name",
-          "type": 9
-        },
-        {
           "id": "3:5238513438894272256",
           "name": "description",
           "type": 9
         },
         {
-          "id": "4:2559808634765809188",
-          "name": "path",
+          "id": "6:4233755004371449726",
+          "name": "title",
           "type": 9
         },
         {
-          "id": "5:8930520432529112181",
-          "name": "isHidden",
+          "id": "7:1918303633750605651",
+          "name": "createdAt",
+          "type": 10
+        },
+        {
+          "id": "8:1203513880764954712",
+          "name": "mood",
+          "type": 9
+        },
+        {
+          "id": "9:254858855066636018",
+          "name": "location",
+          "type": 9
+        },
+        {
+          "id": "10:8025425492154879419",
+          "name": "isPrivate",
           "type": 1
+        },
+        {
+          "id": "11:3429793192619775892",
+          "name": "isPinned",
+          "type": 1
+        }
+      ],
+      "relations": [
+        {
+          "id": "1:3553157656805797368",
+          "name": "media",
+          "targetId": "2:4990127734522147987"
+        },
+        {
+          "id": "2:5788457066546154101",
+          "name": "tags",
+          "targetId": "3:6830980914401510258"
+        }
+      ]
+    },
+    {
+      "id": "2:4990127734522147987",
+      "lastPropertyId": "4:7282756500832412663",
+      "name": "MemoryMedia",
+      "properties": [
+        {
+          "id": "1:7493978073226773894",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:405136867416308246",
+          "name": "filePath",
+          "type": 9
+        },
+        {
+          "id": "3:848919717716638770",
+          "name": "type",
+          "type": 9
+        },
+        {
+          "id": "4:7282756500832412663",
+          "name": "note",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "3:6830980914401510258",
+      "lastPropertyId": "2:1041185991775521733",
+      "name": "MemoryTag",
+      "properties": [
+        {
+          "id": "1:8900708150938987457",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:1041185991775521733",
+          "name": "value",
+          "type": 9
         }
       ],
       "relations": []
     }
   ],
-  "lastEntityId": "1:8202836708141696390",
+  "lastEntityId": "3:6830980914401510258",
   "lastIndexId": "0:0",
-  "lastRelationId": "0:0",
+  "lastRelationId": "2:5788457066546154101",
   "lastSequenceId": "0:0",
   "modelVersion": 5,
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    7167246905422961780,
+    2559808634765809188,
+    8930520432529112181
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

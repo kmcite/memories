@@ -1,12 +1,10 @@
+import 'dart:async';
+
 import 'package:forui/forui.dart';
-import 'package:memories/api/settings_repository.dart';
+import 'package:memories/domain/api/settings_repository.dart';
 import 'package:memories/main.dart';
 
-enum ResetPasswordStatus {
-  verificationEmail,
-  newPassword,
-  success,
-}
+enum ResetPasswordStatus { verificationEmail, newPassword, success }
 
 final ResetPasswordBloc resetBloc = ResetPasswordBloc();
 
@@ -28,10 +26,7 @@ class ResetPasswordBloc {
   Timer? timer;
 
   void startTimer() {
-    timer = Timer(
-      3.seconds,
-      backManually,
-    );
+    timer = Timer(3.seconds, backManually);
   }
 
   void cancelTimer() {
@@ -86,17 +81,12 @@ class SuccessUI extends UI {
     return Scaffold(
       appBar: AppBar(
         title: 'succesful'.text(),
-        leading: Icon(
-          Icons.done,
-          color: Colors.green,
-        ),
+        leading: Icon(Icons.done, color: Colors.green),
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'password reset successfully',
-          ).pad(),
+          Text('password reset successfully').pad(),
           Text(
             'application will go back to login page in a few moments automatically',
           ).pad(),
@@ -116,16 +106,11 @@ class NewPasswordUI extends UI {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: 'input new password'.text(),
-        leading: SizedBox(),
-      ),
+      appBar: AppBar(title: 'input new password'.text(), leading: SizedBox()),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            'please input your new password',
-          ).pad(),
+          Text('please input your new password').pad(),
           FTextField(
             initialValue: resetBloc.newPasswordRM.state,
             onChange: resetBloc.setNewPassword,
@@ -152,7 +137,7 @@ class EmailVerification extends UI {
           FButton.icon(
             onPress: navigator.back,
             child: FIcon(FAssets.icons.arrowLeft),
-          )
+          ),
         ],
         title: 'Email Verification'.text(),
       ),
@@ -160,10 +145,7 @@ class EmailVerification extends UI {
         children: [
           Text(
             'input your registered email',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-            ),
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
           ).pad(),
           FTextField(
             initialValue: resetBloc.verificationEmailRM.state,
@@ -173,8 +155,9 @@ class EmailVerification extends UI {
           FButton(
             label: 'Verify Email'.text(),
             onPress: resetBloc.isVerified
-                ? () =>
-                    resetBloc.setResetStatus(ResetPasswordStatus.newPassword)
+                ? () => resetBloc.setResetStatus(
+                      ResetPasswordStatus.newPassword,
+                    )
                 : null,
           ).pad(),
         ],

@@ -1,15 +1,15 @@
 import 'package:forui/forui.dart';
-import 'package:memories/api/settings_repository.dart';
+import 'package:memories/domain/api/settings_repository.dart';
 import 'package:memories/main.dart';
 
 final popOverRM = false.inj();
 
 mixin ThemeModeBloc {
-  Modifier<ThemeMode> get themeMode => settignsRepository.themeMode;
+  final themeMode = settignsRepository.themeMode;
 }
 
 class ThemeModeChange extends UI with ThemeModeBloc {
-  const ThemeModeChange({super.key});
+  ThemeModeChange({super.key});
 
   @override
   Widget build(BuildContext context) {

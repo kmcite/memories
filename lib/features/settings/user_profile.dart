@@ -1,11 +1,11 @@
 import 'package:forui/forui.dart';
-import 'package:memories/api/settings_repository.dart';
+import 'package:memories/domain/api/settings_repository.dart';
 
 import '../../main.dart';
 
 mixin UserProfileBloc {
-  Modifier<String> get name => settignsRepository.name;
-  Modifier<String> get email => settignsRepository.email;
+  final name = settignsRepository.name;
+  final email = settignsRepository.email;
 }
 
 class UserProfile extends UI with UserProfileBloc {
@@ -23,19 +23,11 @@ class UserProfile extends UI with UserProfileBloc {
       //     style: TextStyle(color: theme.colorScheme.onPrimary),
       //   ),
       // ),
-      subtitle: Text(
-        email(),
-        style: theme.textTheme.bodyMedium,
-      ),
+      subtitle: Text(email(), style: theme.textTheme.bodyMedium),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FButton(
-            label: Text(
-              name(),
-            ),
-            onPress: () {},
-          ),
+          FButton(label: Text(name()), onPress: () {}),
           FButton(
             onPress: () {
               RM.navigate.toDialog(UserNameDialog());
@@ -50,8 +42,8 @@ class UserProfile extends UI with UserProfileBloc {
 
 mixin UserNameBloc {
   final focus = FocusNode();
-  Modifier<String> get name => settignsRepository.name;
-  Modifier<String> get email => settignsRepository.email;
+  final name = settignsRepository.name;
+  final email = settignsRepository.email;
 }
 
 class UserNameDialog extends UI with UserNameBloc {

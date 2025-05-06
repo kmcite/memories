@@ -8,10 +8,10 @@ class App extends UI {
   Widget build(BuildContext context) {
     return Material(
       child:
-          //  settingsRM.isLocked()
-          // ? buildLockedScreen()
-          // :
-          SafeArea(child: buildMainScreen()),
+      //  settingsRM.isLocked()
+      // ? buildLockedScreen()
+      // :
+      SafeArea(child: buildMainScreen()),
     );
   }
 
@@ -69,14 +69,13 @@ class App extends UI {
           route(selectedRoute);
         }
       },
-      destinations: Routes.values.map(
-        (routeOption) {
-          return NavigationDestination(
-            icon: Icon(routeOption.icon),
-            label: routeOption.name,
-          );
-        },
-      ).toList(),
+      destinations:
+          Routes.values.map((routeOption) {
+            return NavigationDestination(
+              icon: Icon(routeOption.icon),
+              label: routeOption.name,
+            );
+          }).toList(),
     );
   }
 }

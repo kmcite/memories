@@ -2,11 +2,11 @@ import 'package:forui/forui.dart';
 import 'package:memories/main.dart';
 
 mixin ChangePasswordBloc {
-  Modifier<String> get password => ([_]) => '';
+  final password = ([_]) => '';
 }
 
 class ChangePasswordDialog extends UI with ChangePasswordBloc {
-  const ChangePasswordDialog({super.key});
+  ChangePasswordDialog({super.key});
   @override
   Widget build(BuildContext context) {
     return FDialog(
@@ -20,10 +20,7 @@ class ChangePasswordDialog extends UI with ChangePasswordBloc {
           ),
         ),
         Expanded(
-          child: FButton(
-            onPress: () => navigator.back(),
-            label: Text('apply'),
-          ),
+          child: FButton(onPress: () => navigator.back(), label: Text('apply')),
         ),
         FTextField(
           obscureText: true,

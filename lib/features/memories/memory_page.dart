@@ -1,6 +1,6 @@
 import 'package:file_picker/file_picker.dart';
 import 'package:memories/main.dart';
-import '../../models/memory.dart';
+import '../../domain/models/memory.dart';
 
 class MemoryPage extends UI {
   final Memory memory;
@@ -8,9 +8,9 @@ class MemoryPage extends UI {
 
   static final isFullscreenRM = RM.inject(() => false);
 
-  bool isFullscreen([bool? _]) {
-    if (_ != null) {
-      isFullscreenRM.state = _;
+  bool isFullscreen([bool? value]) {
+    if (value != null) {
+      isFullscreenRM.state = value;
     }
     return isFullscreenRM.state;
   }
@@ -24,7 +24,7 @@ class MemoryPage extends UI {
           ? null
           : AppBar(
               title: Text(
-                memoryItem.name,
+                memoryItem.title,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   letterSpacing: 0.5,
@@ -33,7 +33,10 @@ class MemoryPage extends UI {
               elevation: 2,
               backgroundColor: Colors.blueGrey[800],
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, color: Colors.white),
+                icon: const Icon(
+                  Icons.arrow_back_ios_new,
+                  color: Colors.white,
+                ),
                 onPressed: () => Navigator.pop(context),
               ),
               actions: [
@@ -92,7 +95,7 @@ class MemoryPage extends UI {
         minScale: 0.5,
         maxScale: 4.0,
         child: Image.file(
-          File(memory.path),
+          File('memory.path'),
           fit: BoxFit.contain,
           errorBuilder: (_, __, ___) => errorDisplay,
         ),
@@ -144,11 +147,7 @@ class MemoryPage extends UI {
   Widget toggleFullscreen() {
     return IconButton(
       onPressed: () => isFullscreen(!isFullscreen()),
-      icon: const Icon(
-        Icons.fullscreen,
-        size: 30,
-        color: Colors.white,
-      ),
+      icon: const Icon(Icons.fullscreen, size: 30, color: Colors.white),
       padding: EdgeInsets.all(12),
     );
   }

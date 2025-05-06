@@ -1,110 +1,64 @@
 import 'package:forui/forui.dart';
-import 'package:memories/api/memories_repository.dart';
+import 'package:memories/_new_.dart';
+import 'package:memories/domain/api/memories_repository.dart';
 import 'package:memories/features/memories/memory_tile.dart';
+// import 'package:memories/features/memories/new_memory_add_dialog.dart';
+import 'package:memories/features/startup/locked_page.dart';
 import 'package:memories/main.dart';
-import 'package:memories/models/memory.dart';
 import 'package:memories/features/settings/settings_page.dart';
 
-mixin HomeBloc {
-  CollectionModifier<Memory> get memories => memoriesRepository;
-  Modifier<Memory> get memory => memoriesRepository.item;
-
-  void addNewMemoryDialog() {
-    memory(Memory());
-    navigator.toDialog(
-      NewMemoryAddDialog(),
-    );
-  }
+void _openSettings() => navigator.to(SettingsPage());
+void _openNewMemoryDialog() => navigator.toDialog(AddMemoryDialog());
+void _lock() {
+  navigator.toReplacement(LockedPage());
 }
 
-class HomePage extends UI with HomeBloc {
+final _memoriesRM = RM.injectStream(
+  () => memoriesRepository.watch(),
+  initialState: memoriesRepository(),
+);
+
+class MemoriesPage extends UI {
   @override
   Widget build(BuildContext context) {
     return FScaffold(
-      header: FHeader(
+      header: FHeader.nested(
         title: 'Memories'.text(),
-        actions: [
-          FButton.icon(
-            onPress: () => navigator.to(SettingsPage()),
-            child: FIcon(FAssets.icons.settings),
-          ).pad(),
+        prefixActions: [
+          FHeaderAction(
+            onPress: _openNewMemoryDialog,
+            icon: FIcon(FAssets.icons.plus),
+          ),
+          FHeaderAction(
+            onPress: _openSettings,
+            icon: FIcon(FAssets.icons.settings),
+          ),
+        ],
+        suffixActions: [
+          FHeaderAction(
+            onPress: _lock,
+            icon: FIcon(FAssets.icons.lock),
+          ),
         ],
       ),
-      content: ListView.builder(
-        itemCount: memories().length,
-        itemBuilder: (context, index) {
-          return MemoryTile(
-            memory: memories().elementAt(index),
-          );
-        },
-      ),
-      footer: FButton(
-        onPress: () {
-          addNewMemoryDialog();
-        },
-        label: FIcon(FAssets.icons.plus),
-      ).pad(),
-    );
-  }
-}
-
-mixin NewMemoryAddBloc {
-  CollectionModifier<Memory> get memories => memoriesRepository;
-  Modifier<Memory> get memory => memoriesRepository.item;
-
-  String name([String? val]) {
-    if (val != null) memory(memory()..name = val);
-    return memory().name;
-  }
-
-  String description([String? val]) {
-    if (val != null) memory(memory()..description = val);
-    return memory().description;
-  }
-
-  void cancel() {
-    navigator.back();
-  }
-
-  void saveMemory() {
-    memories(memory());
-    navigator.back();
-  }
-}
-
-class NewMemoryAddDialog extends UI with NewMemoryAddBloc {
-  const NewMemoryAddDialog({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return FDialog(
-      title: 'New Memory'.text(),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
+      content: Column(
         children: [
           FTextField(
-            initialValue: name(),
-            onChange: name,
-            label: Text('name'),
+            label: Text('Search memories...'),
+            hint: 'memory',
           ),
-          FTextField(
-            initialValue: description(),
-            onChange: description,
-            label: Text('description'),
+          Expanded(
+            child: ListView.builder(
+              itemCount: _memoriesRM.state.length,
+              itemBuilder: (context, index) {
+                return MemoryTile(
+                  memory: _memoriesRM.state.elementAt(index),
+                );
+              },
+            ),
           ),
         ],
-      ).pad(),
-      actions: [
-        FButton.icon(
-          onPress: () => cancel(),
-          child: FIcon(FAssets.icons.chevronDown),
-        ),
-        FButton.icon(
-          onPress: () => saveMemory(),
-          child: FIcon(FAssets.icons.checkCheck),
-        ),
-      ],
-      direction: Axis.horizontal,
+      ),
     );
   }
 }

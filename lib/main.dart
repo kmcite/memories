@@ -1,33 +1,31 @@
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:forui/forui.dart';
-import 'package:memories/api/settings_repository.dart';
+import 'package:memories/domain/api/settings_repository.dart';
+import 'package:memories/features/memories/memories_page.dart';
 import 'package:memories/objectbox.g.dart';
-import 'package:memories/features/startup/locked_page.dart';
 import 'main.dart';
 
 export 'dart:developer' show log;
 export 'dart:io';
 export 'package:memories/features/memories/memory_page.dart';
-export 'package:memories/_archive/memories_app.dart';
 export 'package:states_rebuilder/states_rebuilder.dart';
 export 'package:manager/manager.dart';
+export 'package:flutter/material.dart';
 
 void main() {
   FlutterNativeSplash.preserve(
     widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
   );
-  manager(
-    App(),
-    openStore: openStore,
-  );
+  manager(App(), openStore: openStore);
 }
 
-mixin _App {
-  ThemeMode get themeMode => settignsRepository.themeMode();
-  bool get dark => true;
-}
+final themeModeRM = RM.injectStream(
+  () => settignsRepository.stream.map((settings) => settings.themeMode),
+  initialState: ThemeMode.system,
+);
 
-class App extends UI with _App {
+class App extends UI {
+  const App({super.key});
   void didMountWidget(context) {
     FlutterNativeSplash.remove();
   }
@@ -37,16 +35,19 @@ class App extends UI with _App {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: navigator.navigatorKey,
-      home: LockedPage(),
-      builder: (context, child) => FTheme(
-        data: dark ? FThemes.yellow.dark : FThemes.yellow.light,
-        child: child!,
-      ),
-      themeMode: themeMode,
+      home: MemoriesPage(),
+      //  LockedPage()
+      builder: (context, child) {
+        return FTheme(
+          data: themeModeRM.state == ThemeMode.dark
+              ? FThemes.yellow.dark
+              : FThemes.yellow.light,
+          child: child!,
+        );
+      },
+      themeMode: themeModeRM.state,
     );
   }
 }
 
 final navigator = RM.navigate;
-
-typedef UI = ReactiveStatelessWidget;

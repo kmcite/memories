@@ -1,5 +1,5 @@
 import 'package:forui/forui.dart';
-import 'package:memories/api/settings_repository.dart';
+import 'package:memories/domain/api/settings_repository.dart';
 import 'package:memories/features/startup/forgot_password_page.dart';
 import 'package:memories/features/memories/memories_page.dart';
 import 'package:memories/main.dart';
@@ -7,16 +7,14 @@ import 'package:memories/main.dart';
 mixin UnlockingBloc {
   bool get isUserAllowedToUnlock =>
       settignsRepository.password() == inputPassword();
-  Modifier<String> get inputPassword => settignsRepository.inputPassword;
+  final inputPassword = settignsRepository.inputPassword;
 }
 
 class LockedPage extends UI with UnlockingBloc {
   @override
   Widget build(BuildContext context) {
     return FScaffold(
-      header: FHeader(
-        title: Text('memories'),
-      ),
+      header: FHeader(title: Text('memories')),
       content: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -25,29 +23,21 @@ class LockedPage extends UI with UnlockingBloc {
           children: [
             Text(
               'application is locked',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ).pad(),
-            FTextField(
-              onChange: inputPassword,
-              label: Text('Password'),
-            ).pad(),
+            FTextField(onChange: inputPassword, label: Text('Password')).pad(),
             FButton(
               label: Text('Unlock'),
               onPress: isUserAllowedToUnlock
                   ? () {
-                      navigator.toReplacement(HomePage());
+                      navigator.toReplacement(MemoriesPage());
                     }
                   : null,
             ).pad(),
             FButton(
               label: 'Forgot Password'.text(),
               onPress: () {
-                navigator.toDialog(
-                  ResetPasswordPage(),
-                );
+                navigator.toDialog(ResetPasswordPage());
               },
             ).pad(),
           ],
