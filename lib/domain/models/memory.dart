@@ -1,8 +1,7 @@
-import 'package:manager/manager.dart';
 import 'package:objectbox/objectbox.dart';
 
 @Entity()
-class Memory extends Model {
+class Memory {
   @Id()
   int id;
 
@@ -30,7 +29,7 @@ class Memory extends Model {
 }
 
 @Entity()
-class MemoryMedia extends Model {
+class MemoryMedia {
   @Id()
   int id;
 
@@ -48,7 +47,7 @@ class MemoryMedia extends Model {
 }
 
 @Entity()
-class MemoryTag extends Model {
+class MemoryTag {
   @Id()
   int id;
 

@@ -1,32 +1,56 @@
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:forui/forui.dart';
-import 'package:memories/domain/api/settings_repository.dart';
-import 'package:memories/features/memories/memories_page.dart';
+import 'package:memories/utils/extensions/state.dart';
+import 'package:memories/features/startup/locked_page.dart';
+import 'package:memories/domain/api/memories_repository.dart';
+import 'package:memories/utils/architecture/repositories.dart';
+import 'package:memories/utils/architecture/services.dart';
+import 'package:memories/utils/navigator.dart';
 import 'package:memories/objectbox.g.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'domain/api/settings_repository.dart';
+import 'features/memories/memories_page.dart';
 import 'main.dart';
-
 export 'dart:developer' show log;
 export 'dart:io';
 export 'package:memories/features/memories/memory_page.dart';
-export 'package:states_rebuilder/states_rebuilder.dart';
-export 'package:manager/manager.dart';
 export 'package:flutter/material.dart';
 
-void main() {
+void main() async {
   FlutterNativeSplash.preserve(
     widgetsBinding: WidgetsFlutterBinding.ensureInitialized(),
   );
-  manager(App(), openStore: openStore);
+  final appInfo = await PackageInfo.fromPlatform();
+  final path = await getApplicationDocumentsDirectory();
+
+  final store = await openStore(directory: join(path.path, appInfo.appName));
+
+  service(store);
+
+  repository(MemoriesRepository());
+  repository(SettingsRepository());
+
+  runApp(App());
 }
 
-final themeModeRM = RM.injectStream(
-  () => settignsRepository.stream.map((settings) => settings.themeMode),
-  initialState: ThemeMode.system,
-);
-
-class App extends UI {
+class App extends StatefulWidget {
   const App({super.key});
-  void didMountWidget(context) {
+
+  @override
+  State<App> createState() => _AppState();
+}
+
+class _AppState extends State<App> {
+  late SettingsRepository settingsRepository = depend();
+
+  bool get dark => settingsRepository.dark;
+  bool get locked => settingsRepository.locked;
+
+  @override
+  void initState() {
+    super.initState();
     FlutterNativeSplash.remove();
   }
 
@@ -35,19 +59,16 @@ class App extends UI {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       navigatorKey: navigator.navigatorKey,
-      home: MemoriesPage(),
-      //  LockedPage()
+      home: locked ? LockedPage() : MemoriesPage(),
       builder: (context, child) {
         return FTheme(
-          data: themeModeRM.state == ThemeMode.dark
-              ? FThemes.yellow.dark
-              : FThemes.yellow.light,
+          data: dark ? FThemes.yellow.dark : FThemes.yellow.light,
           child: child!,
         );
       },
-      themeMode: themeModeRM.state,
+      theme: ThemeData(),
+      darkTheme: ThemeData.dark(),
+      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
     );
   }
 }
-
-final navigator = RM.navigate;

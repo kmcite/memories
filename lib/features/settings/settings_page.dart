@@ -1,52 +1,53 @@
 import 'package:forui/forui.dart';
-import 'package:memories/domain/api/settings_repository.dart';
+import 'package:memories/utils/extensions/state.dart';
 import 'package:memories/main.dart';
-import 'package:memories/features/settings/password_setup.dart';
-import 'package:memories/features/settings/user_profile.dart';
+import 'package:memories/utils/navigator.dart';
 
-final themeModeRM = RM.injectStream(
-  () => settignsRepository.stream.map((settings) => settings.themeMode),
-  initialState: settignsRepository.value.themeMode,
-);
+import '../../domain/api/settings_repository.dart';
+import 'user_profile.dart';
 
-ThemeMode _themeMode([ThemeMode? themeMode]) {
-  if (themeMode != null) {
-    settignsRepository.themeMode(themeMode);
-  }
-  return themeModeRM.state;
+class SettingsPage extends StatefulWidget {
+  const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
 }
 
-class SettingsPage extends UI {
-  const SettingsPage({super.key});
+class _SettingsPageState extends State<SettingsPage> {
+  late SettingsRepository settingsRepository = depend();
+  ThemeMode get themeMode => settingsRepository.themeMode;
+  void onThemeModeChanged(ThemeMode value) {
+    settingsRepository.toggle(value);
+  }
 
   @override
   Widget build(BuildContext context) {
     return FScaffold(
-      header: FHeader.nested(
-        prefixActions: [
+      header: FHeader(
+        suffixes: [
           FHeaderAction.x(onPress: navigator.back),
         ],
         title: Text('Settings'),
       ),
-      content: Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          FTileGroup(
-            label: FTile(
-              title: _themeMode().name.toUpperCase().text(),
-            ),
+          Column(
+            // label: FTile(
+            //   title: _themeMode().name.toUpperCase().text(),
+            // ),
             children: ThemeMode.values.map(
-              (themeMode) {
+              (_themeMode) {
                 return FTile(
-                  enabled: themeMode != _themeMode(),
-                  title: themeMode.name.toUpperCase().text(),
-                  onPress: () => _themeMode(themeMode),
+                  enabled: _themeMode != themeMode,
+                  title: Text(_themeMode.name.toUpperCase()),
+                  onPress: () => onThemeModeChanged(_themeMode),
                 );
               },
             ).toList(),
           ),
           UserProfile(),
-          PasswordSetup(),
+          // PasswordSetup(),
         ],
       ),
     );

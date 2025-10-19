@@ -1,6 +1,4 @@
+import 'package:memories/utils/architecture/crud_repository.dart';
 import 'package:memories/domain/models/memory.dart';
-import 'package:memories/main.dart';
 
-class MemoryMediasRepository extends CRUD<MemoryMedia> {}
-
-final memoryMediasRepository = MemoryMediasRepository();
+class MemoryMediasRepository extends CrudRepository<MemoryMedia> {}

@@ -1,58 +1,76 @@
 import 'package:forui/forui.dart';
-import 'package:memories/_new_.dart';
-import 'package:memories/domain/api/memories_repository.dart';
+import 'package:hux/hux.dart';
+import 'package:memories/features/memories/dialogs/new_memory_v2.dart';
+import 'package:memories/utils/extensions/state.dart';
+import 'package:memories/domain/api/settings_repository.dart';
+import 'package:memories/domain/models/memory.dart';
 import 'package:memories/features/memories/memory_tile.dart';
-// import 'package:memories/features/memories/new_memory_add_dialog.dart';
 import 'package:memories/features/startup/locked_page.dart';
 import 'package:memories/main.dart';
-import 'package:memories/features/settings/settings_page.dart';
+import 'package:memories/domain/api/memories_repository.dart';
+import 'package:memories/utils/navigator.dart';
 
-void _openSettings() => navigator.to(SettingsPage());
-void _openNewMemoryDialog() => navigator.toDialog(AddMemoryDialog());
-void _lock() {
-  navigator.toReplacement(LockedPage());
+import '../settings/settings_page.dart';
+
+class MemoriesPage extends StatefulWidget {
+  @override
+  State<MemoriesPage> createState() => _MemoriesPageState();
 }
 
-final _memoriesRM = RM.injectStream(
-  () => memoriesRepository.watch(),
-  initialState: memoriesRepository(),
-);
+class _MemoriesPageState extends State<MemoriesPage> {
+  late MemoriesRepository memoriesRepository = depend();
+  late SettingsRepository settingsRepository = depend();
 
-class MemoriesPage extends UI {
+  List<Memory> get memories => memoriesRepository.getAll();
+
+  void onSettingsOpened() {
+    navigator.to(SettingsPage());
+  }
+
+  void onNewMemoryDialogOpened() => navigator.toDialog(AddMemoryDialog());
+  void onLocked() {
+    settingsRepository.lock();
+    navigator.toAndRemoveUntil(LockedPage());
+  }
+
   @override
   Widget build(BuildContext context) {
     return FScaffold(
-      header: FHeader.nested(
-        title: 'Memories'.text(),
-        prefixActions: [
+      header: FHeader(
+        title: Text('Memories'),
+        // centerTitle: false,
+        suffixes: [
           FHeaderAction(
-            onPress: _openNewMemoryDialog,
-            icon: FIcon(FAssets.icons.plus),
+            onPress: onNewMemoryDialogOpened,
+            icon: Icon(FeatherIcons.briefcase),
+            // size: HuxButtonSize.small,
           ),
           FHeaderAction(
-            onPress: _openSettings,
-            icon: FIcon(FAssets.icons.settings),
+            onPress: onSettingsOpened,
+            icon: Icon(FeatherIcons.settings),
+            // size: HuxButtonSize.small,
           ),
-        ],
-        suffixActions: [
           FHeaderAction(
-            onPress: _lock,
-            icon: FIcon(FAssets.icons.lock),
+            onPress: onLocked,
+            icon: Icon(FeatherIcons.lock),
+            // size: HuxButtonSize.small,
           ),
         ],
       ),
-      content: Column(
+      child: Column(
         children: [
-          FTextField(
-            label: Text('Search memories...'),
-            hint: 'memory',
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: FTextField(
+              hint: 'Search for memory here.',
+            ),
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: _memoriesRM.state.length,
+              itemCount: memories.length,
               itemBuilder: (context, index) {
                 return MemoryTile(
-                  memory: _memoriesRM.state.elementAt(index),
+                  memory: memories[index],
                 );
               },
             ),

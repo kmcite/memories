@@ -1,69 +1,64 @@
 import 'package:forui/forui.dart';
-import 'package:memories/domain/api/settings_repository.dart';
+import 'package:hux/hux.dart';
+import 'package:memories/utils/navigator.dart';
+import 'package:signals_flutter/signals_flutter.dart';
 
 import '../../main.dart';
 
-mixin UserProfileBloc {
-  final name = settignsRepository.name;
-  final email = settignsRepository.email;
+class UserProfile extends StatefulWidget {
+  @override
+  State<UserProfile> createState() => _UserProfileState();
 }
 
-class UserProfile extends UI with UserProfileBloc {
+class _UserProfileState extends State<UserProfile> {
+  final name = signal('adn');
+  final email = signal('adn@gmail.com');
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    return FCard(
-      title: Text('user profile'),
-      // leading: CircleAvatar(
-      //   backgroundColor: theme.colorScheme.primary,
-      //   child: Text(
-      //     settingsBloc.name.isNotEmpty
-      //         ? settingsBloc.name.characters.first.toUpperCase()
-      //         : '',
-      //     style: TextStyle(color: theme.colorScheme.onPrimary),
-      //   ),
-      // ),
-      subtitle: Text(email(), style: theme.textTheme.bodyMedium),
+    return HuxCard(
+      title: ('User Profile'),
+      subtitle: email(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
+        spacing: 8,
         children: [
-          FButton(label: Text(name()), onPress: () {}),
-          FButton(
-            onPress: () {
-              RM.navigate.toDialog(UserNameDialog());
+          HuxButton(
+            child: Text(name()),
+            onPressed: () {},
+          ),
+          HuxButton(
+            onPressed: () {
+              navigator.toDialog(UserNameDialog());
             },
-            label: Text('update user informations'),
+            child: Text('update user information'),
           ),
         ],
       ),
-    ).pad();
+    );
   }
 }
 
-mixin UserNameBloc {
-  final focus = FocusNode();
-  final name = settignsRepository.name;
-  final email = settignsRepository.email;
-}
+final focus = FocusNode();
 
-class UserNameDialog extends UI with UserNameBloc {
+class UserNameDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return FDialog(
       actions: [
         FTextField(
-          label: Text('Name'),
-          initialValue: name(),
-          onChange: name,
+          // label: Text('Name'),
+          // initialValue: name(),
+          // onChanged: name,
           onSubmit: (value) => FocusScope.of(context).requestFocus(focus),
-        ).pad(),
-        FTextField.email(
+        ),
+        FTextField(
           // placeholder: Text('email'),
-          focusNode: focus,
-          initialValue: email(),
-          onChange: email,
+          // focusNode: focus,
+          // initialValue: email(),
+          onChange: (email) {},
           onSubmit: (value) => navigator.back(),
-        ).pad(),
+        ),
       ],
     );
   }

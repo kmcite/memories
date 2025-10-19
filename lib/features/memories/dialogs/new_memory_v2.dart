@@ -2,8 +2,12 @@ import 'package:file_picker/file_picker.dart';
 import 'package:forui/forui.dart';
 import 'package:memories/domain/api/memories_repository.dart';
 import 'package:memories/domain/models/memory.dart';
+import 'package:memories/utils/extensions/dynamic.dart';
+import 'package:memories/utils/extensions/state.dart';
+import 'package:memories/utils/extensions/widget.dart';
+import 'package:memories/utils/navigator.dart';
 
-import 'main.dart';
+import '../../../main.dart';
 
 class AddMemoryDialog extends StatefulWidget {
   const AddMemoryDialog({super.key});
@@ -13,6 +17,8 @@ class AddMemoryDialog extends StatefulWidget {
 }
 
 class _AddMemoryDialogState extends State<AddMemoryDialog> {
+  late MemoriesRepository memoriesRepository = depend();
+
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _tagController = TextEditingController();
@@ -72,6 +78,7 @@ class _AddMemoryDialogState extends State<AddMemoryDialog> {
       title: const Text('Add New Memory'),
       body: SingleChildScrollView(
         child: Column(
+          spacing: 8,
           children: [
             FTextField(
               controller: _titleController,
@@ -100,10 +107,10 @@ class _AddMemoryDialogState extends State<AddMemoryDialog> {
                           );
                         },
                         child: FBadge(
-                          label: mood.text(),
+                          child: mood.text(),
                           style: _mood == mood
-                              ? FBadgeStyle.primary
-                              : FBadgeStyle.secondary,
+                              ? FBadgeStyle.primary()
+                              : FBadgeStyle.secondary(),
                         ),
                       );
                     },
@@ -144,7 +151,7 @@ class _AddMemoryDialogState extends State<AddMemoryDialog> {
               children: _tags.map(
                 (tag) {
                   return FBadge(
-                    label: Text('#${tag.value}'),
+                    child: Text('#${tag.value}'),
                   ).pad(all: 4);
                 },
               ).toList(),
@@ -169,24 +176,24 @@ class _AddMemoryDialogState extends State<AddMemoryDialog> {
                   ).toList(),
                 ),
               ),
+            FButton(
+              onPress: _pickMedia,
+              prefix: const Icon(Icons.photo_library),
+              child: const Text('Pick Media'),
+            ),
           ],
         ),
       ),
-      direction: Axis.vertical,
+      direction: Axis.horizontal,
       actions: [
         FButton(
-          onPress: _pickMedia,
-          prefix: const Icon(Icons.photo_library),
-          label: const Text('Pick Media'),
-        ),
-        FButton(
-          onPress: () => Navigator.pop(context),
-          label: const Text('Cancel'),
-          style: FButtonStyle.destructive,
+          onPress: () => navigator.back(),
+          child: const Text('Cancel'),
+          style: FButtonStyle.destructive(),
         ),
         FButton(
           onPress: _save,
-          label: const Text('Save'),
+          child: const Text('Save'),
         ),
       ],
     );

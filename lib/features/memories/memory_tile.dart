@@ -1,18 +1,23 @@
 import 'package:forui/forui.dart';
-import 'package:memories/domain/api/memories_repository.dart';
+import 'package:memories/utils/extensions/state.dart';
 import 'package:memories/features/memories/edit.dart';
+import 'package:memories/features/memories/dialogs/memory_deletion_dialog.dart';
+import 'package:memories/domain/api/memories_repository.dart';
+import 'package:memories/utils/navigator.dart';
 
 import '../../main.dart';
 import '../../domain/models/memory.dart';
 
-String formatRelativeDate(DateTime date) {
-  final now = DateTime.now();
-  final diff = now.difference(date);
+extension DateTimeExtensions on DateTime {
+  String formatRelative() {
+    final now = DateTime.now();
+    final diff = now.difference(this);
 
-  if (diff.inDays >= 1) return '${diff.inDays}d ago';
-  if (diff.inHours >= 1) return '${diff.inHours}h ago';
-  if (diff.inMinutes >= 1) return '${diff.inMinutes}m ago';
-  return 'Just now';
+    if (diff.inDays >= 1) return '${diff.inDays}d ago';
+    if (diff.inHours >= 1) return '${diff.inHours}h ago';
+    if (diff.inMinutes >= 1) return '${diff.inMinutes}m ago';
+    return 'Just now';
+  }
 }
 
 // class MemoryTile extends UI {
@@ -104,7 +109,7 @@ String formatRelativeDate(DateTime date) {
 //   }
 // }
 
-class MemoryTile extends StatelessWidget {
+class MemoryTile extends StatefulWidget {
   final Memory memory;
 
   const MemoryTile({
@@ -113,77 +118,69 @@ class MemoryTile extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    void _confirmDelete(Memory memory) async {
-      final shouldDelete = await showDialog<bool>(
-        context: context,
-        builder: (context) => FDialog(
-          title: const Text('Delete Memory?'),
-          body: const Text('This action cannot be undone.'),
-          actions: [
-            FButton(
-                onPress: () => Navigator.pop(context, false),
-                label: const Text('Cancel')),
-            FButton(
-                onPress: () => Navigator.pop(context, true),
-                label: const Text('Delete')),
-          ],
-        ),
-      );
-      if (shouldDelete == true) {
-        memoriesRepository.remove(memory.id);
-      }
-    }
+  State<MemoryTile> createState() => _MemoryTileState();
+}
 
+class _MemoryTileState extends State<MemoryTile> {
+  late MemoriesRepository memoriesRepository = depend();
+
+  void onDelete(int id) => memoriesRepository.remove(id);
+
+  @override
+  Widget build(BuildContext context) {
     return FTile(
-      prefixIcon: _buildThumbnail(),
+      prefix: SizedBox(
+        width: 40,
+        height: 40,
+        child: _buildThumbnail(),
+      ),
       title: Text(
-        memory.title,
+        widget.memory.title,
         style: const TextStyle(fontWeight: FontWeight.bold),
       ),
       subtitle: Column(
+        spacing: 8,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const SizedBox(height: 4),
           Row(
             children: [
-              if (memory.mood.isNotEmpty)
-                Text(memory.mood, style: const TextStyle(fontSize: 16)),
-              if (memory.mood.isNotEmpty) const SizedBox(width: 6),
+              if (widget.memory.mood.isNotEmpty)
+                Text(widget.memory.mood, style: const TextStyle(fontSize: 16)),
+              if (widget.memory.mood.isNotEmpty) const SizedBox(width: 6),
               Text(
-                formatRelativeDate(memory.createdAt),
-                style: TextStyle(color: Colors.grey[600]),
+                widget.memory.createdAt.formatRelative(),
               ),
             ],
           ),
           const SizedBox(height: 6),
           _buildTagChips(),
-          if (memory.description.trim().isNotEmpty) ...[
-            const SizedBox(height: 6),
-            Text(
-              _shortenText(memory.description),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
+          Text(
+            widget.memory.description,
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
         ],
       ),
       // onPress: onTap,
-      suffixIcon: Row(
+      suffix: Row(
         children: [
-          memory.isPinned
+          widget.memory.isPinned
               ? Icon(Icons.push_pin, size: 20)
               : Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
                       icon: const Icon(Icons.edit),
-                      onPressed: () =>
-                          navigator.to(EditMemoryPage(memory: memory)),
+                      onPressed: () {
+                        navigator.to(EditMemoryPage(memory: widget.memory));
+                      },
                     ),
                     IconButton(
                       icon: const Icon(Icons.delete),
-                      onPressed: () => _confirmDelete(memory),
+                      onPressed: () => memoryDeletionDialog(
+                        widget.memory,
+                        onDelete,
+                      ),
                     ),
                   ],
                 ),
@@ -193,10 +190,10 @@ class MemoryTile extends StatelessWidget {
   }
 
   Widget _buildThumbnail() {
-    if (memory.media.isNotEmpty) {
-      final first = memory.media.firstWhere(
+    if (widget.memory.media.isNotEmpty) {
+      final first = widget.memory.media.firstWhere(
         (m) => m.type == 'image',
-        orElse: () => memory.media.first,
+        orElse: () => widget.memory.media.first,
       );
       return ClipRRect(
         borderRadius: BorderRadius.circular(8),
@@ -205,30 +202,26 @@ class MemoryTile extends StatelessWidget {
           width: 56,
           height: 56,
           fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) => Text(first.path),
         ),
       );
     }
-    return const Icon(Icons.memory, size: 48, color: Colors.grey);
-  }
-
-  Widget _buildTagChips() {
-    if (memory.tags.isEmpty) return const SizedBox();
-    return Wrap(
-      spacing: 4,
-      runSpacing: -8,
-      children: memory.tags.map((tag) {
-        return Chip(
-          label: Text('#${tag.value}'),
-          visualDensity: VisualDensity.compact,
-          materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        );
-      }).toList(),
+    return const Icon(
+      Icons.memory,
+      size: 48,
     );
   }
 
-  String _shortenText(String text, {int maxLength = 100}) {
-    return text.length <= maxLength
-        ? text
-        : '${text.substring(0, maxLength)}...';
+  Widget _buildTagChips() {
+    if (widget.memory.tags.isEmpty) return const SizedBox();
+    return Wrap(
+      spacing: 4,
+      runSpacing: -8,
+      children: widget.memory.tags.map((tag) {
+        return FBadge(
+          child: Text('#${tag.value}'),
+        );
+      }).toList(),
+    );
   }
 }

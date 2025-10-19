@@ -1,8 +1,6 @@
-import 'package:flutter/material.dart';
-import 'dart:io';
-
 import 'package:memories/domain/models/memory.dart';
 import 'package:memories/main.dart';
+import 'package:memories/utils/navigator.dart';
 
 class EditMemoryPage extends StatefulWidget {
   final Memory memory;
