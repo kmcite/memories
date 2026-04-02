@@ -1,22 +1,47 @@
 import 'package:flutter_native_splash/flutter_native_splash.dart';
-import 'package:forui/forui.dart';
-import 'package:memories/utils/extensions/state.dart';
-import 'package:memories/features/startup/locked_page.dart';
-import 'package:memories/domain/api/memories_repository.dart';
-import 'package:memories/utils/architecture/repositories.dart';
-import 'package:memories/utils/architecture/services.dart';
-import 'package:memories/utils/navigator.dart';
-import 'package:memories/objectbox.g.dart';
+import 'package:flutter_redux/flutter_redux.dart';
+import 'package:memories/business/adding_memory.dart';
+import 'package:memories/business/business.dart';
+import 'package:memories/business/dark.dart';
+import 'package:memories/business/locking_mechanism.dart';
+import 'package:memories/business/logging.dart';
+import 'package:memories/business/medias.dart';
+import 'package:memories/business/memories.dart';
+import 'package:memories/business/memory_detail.dart';
+import 'package:memories/business/navigation.dart';
+import 'package:memories/business/reset_password.dart';
+import 'package:memories/features/memories/memories_page.dart';
+import 'package:memories/business/is_initialized.dart';
+import 'package:memories/business/tags.dart';
+import 'package:memories/main.dart';
+import 'package:memories/domain/api/crud_repository.dart';
+import 'package:memories/features/features.dart';
+import 'package:memories/objectbox.g.dart' hide Store;
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'domain/api/settings_repository.dart';
-import 'features/memories/memories_page.dart';
-import 'main.dart';
+import 'package:redux/redux.dart';
+export 'main.dart';
 export 'dart:developer' show log;
 export 'dart:io';
 export 'package:memories/features/memories/memory_page.dart';
 export 'package:flutter/material.dart';
+
+final store = Store(
+  business,
+  initialState: Business(),
+  middleware: [
+    LoggingMW(), // must be first
+    AddingMemoryMW(),
+    LockingMechanismMW(),
+    MemoriesMW(),
+    // NavigationMW(),
+    ResetPasswordMW(),
+    MemoryDetailsMW(),
+    TagsMW(),
+    MediasMW(),
+  ],
+);
 
 void main() async {
   FlutterNativeSplash.preserve(
@@ -24,51 +49,47 @@ void main() async {
   );
   final appInfo = await PackageInfo.fromPlatform();
   final path = await getApplicationDocumentsDirectory();
+  objects = await openStore(
+    directory: join(path.path, appInfo.appName),
+  );
 
-  final store = await openStore(directory: join(path.path, appInfo.appName));
-
-  service(store);
-
-  repository(MemoriesRepository());
-  repository(SettingsRepository());
-
-  runApp(App());
+  runApp(
+    StoreProvider<Business>(
+      store: store,
+      child: App(),
+    ),
+  );
 }
 
-class App extends StatefulWidget {
+class App extends UI {
   const App({super.key});
 
   @override
-  State<App> createState() => _AppState();
-}
-
-class _AppState extends State<App> {
-  late SettingsRepository settingsRepository = depend();
-
-  bool get dark => settingsRepository.dark;
-  bool get locked => settingsRepository.locked;
-
-  @override
-  void initState() {
-    super.initState();
-    FlutterNativeSplash.remove();
+  void init() {
+    dispatch(RemoveFlutterNativeSplash());
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      navigatorKey: navigator.navigatorKey,
-      home: locked ? LockedPage() : MemoriesPage(),
-      builder: (context, child) {
-        return FTheme(
-          data: dark ? FThemes.yellow.dark : FThemes.yellow.light,
-          child: child!,
-        );
-      },
-      theme: ThemeData(),
-      darkTheme: ThemeData.dark(),
-      themeMode: dark ? ThemeMode.dark : ThemeMode.light,
+      navigatorKey: navigator,
+      home: MemoriesPage(),
+      theme: ThemeData.light().copyWith(
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      darkTheme: ThemeData.dark().copyWith(
+        inputDecorationTheme: InputDecorationTheme(
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+        ),
+      ),
+      themeMode: darkSignal() ? ThemeMode.dark : ThemeMode.light,
     );
   }
 }

@@ -1,61 +1,55 @@
-import 'package:forui/forui.dart';
-import 'package:hux/hux.dart';
-import 'package:memories/utils/extensions/state.dart';
-import 'package:memories/domain/api/settings_repository.dart';
-import 'package:memories/features/memories/memories_page.dart';
+import 'package:memories/business/locking_mechanism.dart';
+import 'package:memories/business/navigation.dart';
+import 'package:memories/features/startup/reset_password_page.dart';
 import 'package:memories/main.dart';
-import 'package:memories/utils/navigator.dart';
+import 'package:memories/features/features.dart';
 
-class LockedPage extends StatefulWidget {
-  @override
-  State<LockedPage> createState() => _LockedPageState();
-}
-
-class _LockedPageState extends State<LockedPage> {
-  late SettingsRepository settingsRepository = depend();
-
-  late final password = TextEditingController(text: 'value');
-  late final inputPassword = TextEditingController(text: 'value');
-  bool get isUserAllowedToUnlock => password.text == inputPassword.text;
-
-  void onUnlocked() {
-    settingsRepository.unlock();
-    navigator.toReplacement(MemoriesPage());
-  }
-
+class LockedPage extends UI {
+  const LockedPage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('memories')),
+      backgroundColor: state.lockingMechanism.locked
+          ? Colors.red
+          : Colors.green,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisAlignment: .center,
+          crossAxisAlignment: .stretch,
           spacing: 8,
           children: [
             Icon(
-              FeatherIcons.lock,
+              state.lockingMechanism.locked
+                  ? Icons.lock
+                  : Icons.face_unlock_sharp,
               size: 96,
             ),
             Text(
               'application is locked',
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
-            FTextField(
-              controller: inputPassword,
-              label: Text('Password'),
+            TextFormField(
+              initialValue: state.lockingMechanism.typedPassword,
+              onChanged: (value) => dispatch(ChangeTypedPasswordAction(value)),
+              decoration: InputDecoration(
+                labelText: 'password',
+              ),
             ),
-            HuxButton(
-              child: Text('Unlock'),
-              onPressed: isUserAllowedToUnlock ? onUnlocked : null,
-              icon: FeatherIcons.unlock,
-            ),
-            HuxButton(
-              child: Text('Forgot Password'),
+            FilledButton(
               onPressed: () {
-                // navigator.toDialog(ResetPasswordPage());
-              },
+                final locked = state.lockingMechanism.locked;
+                final isUnlockAllowed = state.lockingMechanism.isUnlockAllowed;
+                if (locked && isUnlockAllowed) {
+                  return () => dispatch(UnlockApplicationAction());
+                }
+                return null;
+              }(),
+              child: Text('unlock'),
+            ),
+            FilledButton(
+              onPressed: () => navigateTo(ResetPasswordPage()),
+              child: Text('forgot password'),
             ),
           ],
         ),

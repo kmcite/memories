@@ -1,53 +1,30 @@
-import 'package:forui/forui.dart';
-import 'package:memories/utils/extensions/state.dart';
+import 'package:memories/business/dark.dart';
 import 'package:memories/main.dart';
-import 'package:memories/utils/navigator.dart';
+import 'package:memories/features/features.dart';
 
-import '../../domain/api/settings_repository.dart';
-import 'user_profile.dart';
-
-class SettingsPage extends StatefulWidget {
+class SettingsPage extends UI {
   const SettingsPage({super.key});
 
   @override
-  State<SettingsPage> createState() => _SettingsPageState();
-}
-
-class _SettingsPageState extends State<SettingsPage> {
-  late SettingsRepository settingsRepository = depend();
-  ThemeMode get themeMode => settingsRepository.themeMode;
-  void onThemeModeChanged(ThemeMode value) {
-    settingsRepository.toggle(value);
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return FScaffold(
-      header: FHeader(
-        suffixes: [
-          FHeaderAction.x(onPress: navigator.back),
-        ],
-        title: Text('Settings'),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Column(
-            // label: FTile(
-            //   title: _themeMode().name.toUpperCase().text(),
-            // ),
-            children: ThemeMode.values.map(
-              (_themeMode) {
-                return FTile(
-                  enabled: _themeMode != themeMode,
-                  title: Text(_themeMode.name.toUpperCase()),
-                  onPress: () => onThemeModeChanged(_themeMode),
-                );
-              },
-            ).toList(),
+    return Scaffold(
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: Text('Settings'),
           ),
-          UserProfile(),
-          // PasswordSetup(),
+          SliverList.list(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: FilledButton(
+                  onPressed: () => toggleDark(),
+                  child: Text('Toggle Mode'),
+                ),
+              ),
+              // UserProfile(),
+            ],
+          ),
         ],
       ),
     );
