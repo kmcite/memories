@@ -1,37 +1,16 @@
+import 'package:flutter/material.dart';
+import 'package:manager/manager.dart';
+import 'package:memories/business/adding_memory.dart';
 import 'package:memories/business/navigation.dart';
-import 'package:memories/domain/api/crud_repository.dart';
-import 'package:memories/domain/models/memory.dart';
 import 'package:memories/features/features.dart';
-import 'package:signals/signals.dart';
-
-import '../../../main.dart';
-
-final title = signal<String>('');
-final description = signal<String>('');
-final mood = signal<String>('');
-final location = signal<String>('');
-
-void setTitle(String value) {
-  title.set(value);
-}
-
-void setDescription(String value) {
-  description.set(value);
-}
-
-void setMood(String value) {
-  mood.set(value);
-}
-
-void setLocation(String value) {
-  location.set(value);
-}
+import 'package:memories/utils/notifier.dart';
 
 class AddMemoryDialog extends UI {
   const AddMemoryDialog({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final addMemoryState = context(addingMemoryStateProvider);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add New Memory'),
@@ -43,17 +22,20 @@ class AddMemoryDialog extends UI {
           children: [
             TextFormField(
               decoration: InputDecoration(labelText: 'Title'),
-              initialValue: title(),
-              onChanged: (v) => setTitle(v),
+              initialValue: addMemoryState.title(),
+              onChanged: addMemoryState.title.set,
             ),
             TextFormField(
               decoration: InputDecoration(labelText: 'Description'),
-              onChanged: (v) => setDescription(v),
-              initialValue: description(),
+              onChanged: addMemoryState.description.set,
+              initialValue: addMemoryState.description(),
               maxLines: 3,
             ),
             ListTile(
-              title: Text(mood(), style: TextStyle(fontSize: 32)),
+              title: Text(
+                addMemoryState.mood(),
+                style: TextStyle(fontSize: 32),
+              ),
               subtitle: SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -61,9 +43,9 @@ class AddMemoryDialog extends UI {
                     (_mood) {
                       return IconButton(
                         icon: Text(_mood),
-                        isSelected: _mood == mood(),
+                        isSelected: _mood == addMemoryState.mood(),
                         onPressed: () {
-                          setMood(_mood);
+                          addMemoryState.mood.set(_mood);
                         },
                       );
                     },
@@ -72,8 +54,8 @@ class AddMemoryDialog extends UI {
               ),
             ),
             TextFormField(
-              initialValue: location(),
-              onChanged: (value) => setLocation(value),
+              initialValue: addMemoryState.location(),
+              onChanged: addMemoryState.location.set,
               decoration: InputDecoration(labelText: 'Location'),
             ),
             Row(
@@ -87,13 +69,7 @@ class AddMemoryDialog extends UI {
                 ),
                 FilledButton(
                   onPressed: () {
-                    memoriesRepository.put(
-                      Memory()
-                        ..title = title()
-                        ..description = description()
-                        ..mood = mood()
-                        ..location = location(),
-                    );
+                    addMemoryState.onMemoryAdded();
                     navigateBack();
                   },
                   child: Text('Add Memory'),

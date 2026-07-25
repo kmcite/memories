@@ -1,27 +1,13 @@
 import 'package:image_picker/image_picker.dart';
+import 'package:memories/main.dart';
 
-EditMemoryState editingMemory(EditMemoryState state, action) {
-  return state;
-}
+final editMemoryStateProvider = provider((ref) => EditMemoryState());
 
-// void title(String title) => emit(state.copyWith(title: title));
-// void description(String description) =>
-//     emit(state.copyWith(description: description));
-// void mood(String mood) => emit(state.copyWith(mood: mood));
-// void tags(List<String> tags) => emit(state.copyWith(tags: tags));
-// void save() {}
-// void pick() async {
-//   final image = await ImagePicker().pickImage(
-//     source: ImageSource.gallery,
-//   );
-//   emit(state.copyWith(image: image));
-// }
-
-class EditMemoryState {
-  String title = '';
-  String description = '';
-  String mood = '';
-  List<String> tags = [];
-  int id = 0;
-  XFile? image;
+class EditMemoryState extends Notifier {
+  late final title = signal('');
+  late final description = signal('');
+  late final mood = signal('');
+  late final tags = signal(<String>[]);
+  late final id = signal(0);
+  late final image = signal<XFile?>(null);
 }

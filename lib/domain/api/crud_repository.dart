@@ -1,13 +1,18 @@
 import 'package:memories/domain/models/memory.dart';
+import 'package:memories/main.dart';
 import 'package:objectbox/objectbox.dart' show Store;
 
 late Store objects;
 
-final memoriesRepository = CrudRepository<Memory>();
+final memoriesRepositoryProvider = provider((ref) => CrudRepository<Memory>());
 
-final memoryMediasRepository = CrudRepository<MemoryMedia>();
+final memoryMediasRepositoryProvider = provider(
+  (ref) => CrudRepository<MemoryMedia>(),
+);
 
-final memoryTagsRepository = CrudRepository<MemoryTag>();
+final memoryTagsRepositoryProvider = provider(
+  (ref) => CrudRepository<MemoryTag>(),
+);
 
 class CrudRepository<T> {
   late final box = objects.box<T>();

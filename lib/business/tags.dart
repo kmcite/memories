@@ -1,40 +1,24 @@
 import 'dart:async';
 
-import 'package:memories/business/business.dart';
 import 'package:memories/domain/api/crud_repository.dart';
 import 'package:memories/domain/models/memory.dart';
-import 'package:memories/features/features.dart';
-import 'package:redux/redux.dart';
+import 'package:memories/main.dart';
 
-class TagsState {
-  List<MemoryTag> tags = [];
-}
+final tagsStateProvider = provider(
+  (ref) => TagsState(ref(memoryTagsRepositoryProvider)),
+);
 
-TagsState tags(TagsState state, action) {
-  return state;
-}
+class TagsState extends Notifier {
+  final CrudRepository<MemoryTag> memoryTagsRepository;
+  StreamSubscription<List<MemoryTag>>? _subscription;
+  TagsState(this.memoryTagsRepository) {
+    _subscription = memoryTagsRepository.watch().listen(tags.set);
+  }
+  late final tags = signal(<MemoryTag>[]);
 
-class TagsMW extends MiddlewareClass<Business> {
-  StreamSubscription? _sub;
   @override
-  call(store, action, next) {
-    next(action);
-    if (action is SubscribeToTags) {
-      _sub = memoryTagsRepository.watch().listen(
-        (tags) => dispatch(TagsChanged(tags)),
-      );
-    } else if (action is UnsubscribeFromTags) {
-      _sub?.cancel();
-      _sub = null;
-    }
+  void dispose() {
+    _subscription?.cancel();
+    super.dispose();
   }
 }
-
-class TagsChanged {
-  final List<MemoryTag> tags;
-  const TagsChanged(this.tags);
-}
-
-class SubscribeToTags {}
-
-class UnsubscribeFromTags {}

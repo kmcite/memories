@@ -1,67 +1,47 @@
-import 'package:memories/business/business.dart';
 import 'package:memories/business/navigation.dart';
 import 'package:memories/features/memories/memories_page.dart';
 import 'package:memories/features/startup/locked_page.dart';
 import 'package:memories/main.dart';
-import 'package:redux/redux.dart';
 
-class LockingMechanismState {
-  bool locked = false;
-  String password = '';
-  String typedPassword = '';
-  bool get isUnlockAllowed => password == typedPassword;
-}
+final lockingMechanismStateProvider = provider(
+  (ref) => LockingMechanismState(),
+);
 
-LockingMechanismState lockingMechanism(LockingMechanismState state, action) {
-  switch (action) {
-    case LockApplicationAction():
-      return state..locked = true;
-    case UnlockApplicationAction():
-      return state..locked = false;
-    case ChangeTypedPasswordAction():
-      return state..typedPassword = action.typedPassword;
-    case ChangePasswordAction():
-      return state..password = action.password;
-    default:
-      return state;
-  }
-}
-
-class LockingMechanismMW extends MiddlewareClass<Business> {
-  @override
-  call(store, action, next) {
-    next(action);
-    switch (action) {
-      case LockApplicationAction():
+class LockingMechanismState extends Notifier {
+  late final ValueNotifier<bool> locked = signal(false)
+    ..addListener(() {
+      if (locked())
         navigator.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => LockedPage()),
           (route) => false,
         );
-        break;
-      case UnlockApplicationAction():
+      else
         navigator.currentState?.pushAndRemoveUntil(
           MaterialPageRoute(builder: (context) => MemoriesPage()),
           (route) => false,
         );
-        break;
-      default:
-        break;
-    }
+    });
+  late final password = signal('');
+  late final typedPassword = signal('');
+
+  bool get isUnlockAllowed => password() == typedPassword();
+
+  void lockApplication() {
+    locked((_) => true);
+  }
+
+  void unlockApplication() {
+    locked((_) => false);
+  }
+
+  late final resetStatus = signal(ResetPasswordStatus.verificationEmail);
+  late final newPassword = signal('');
+
+  void apply() {
+    password.set(newPassword());
+    newPassword.set('');
+    resetStatus.set(.success);
   }
 }
 
-class LockingMechanismAction {}
-
-class LockApplicationAction extends LockingMechanismAction {}
-
-class UnlockApplicationAction extends LockingMechanismAction {}
-
-class ChangeTypedPasswordAction extends LockingMechanismAction {
-  final String typedPassword;
-  ChangeTypedPasswordAction(this.typedPassword);
-}
-
-class ChangePasswordAction extends LockingMechanismAction {
-  final String password;
-  ChangePasswordAction(this.password);
-}
+enum ResetPasswordStatus { verificationEmail, newPassword, success }

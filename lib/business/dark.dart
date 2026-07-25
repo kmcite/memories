@@ -1,17 +1,11 @@
-import 'package:signals/signals_flutter.dart';
+import 'package:manager/manager.dart';
+import 'package:memories/utils/notifier.dart';
 
-// bool dark(bool state, action) {
-//   if (action is DarkToggled) {
-//     return !state;
-//   }
-//   return state;
-// }
+final darkStateProvider = provider((ref) => DarkState());
 
-// class DarkEvent {}
-
-// class DarkToggled extends DarkEvent {}
-
-final darkSignal = signal(false);
-void toggleDark() {
-  darkSignal.set(!darkSignal.value);
+class DarkState extends Notifier {
+  late final dark = signal(false);
+  void toggleDark() {
+    dark((dark) => !dark);
+  }
 }

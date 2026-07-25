@@ -9,6 +9,7 @@ class MemoryDeletionDialog extends UI {
   const MemoryDeletionDialog(this.memory, {super.key});
   @override
   Widget build(BuildContext context) {
+    final memoriesState = context(memoriesStateProvider);
     return SimpleDialog(
       title: const Text('Delete Memory?'),
       contentPadding: .all(16),
@@ -24,9 +25,10 @@ class MemoryDeletionDialog extends UI {
         SizedBox(height: 8),
         FilledButton(
           onPressed: () {
-            dispatchAll([
-              DeleteMemoryAction(memory.id),
-            ]);
+            memoriesState.deleteMemory(memory.id);
+            // dispatchAll([
+            //   DeleteMemoryAction(memory.id),
+            // ]);
             navigateBack();
           },
           child: const Text('Delete'),

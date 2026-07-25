@@ -19,8 +19,10 @@ class MemoryPage extends UI {
   Widget build(BuildContext context) {
     final memoryItem = memory;
 
+    final memoryDetail = context(memoryDetailStateProvider);
+
     return Scaffold(
-      appBar: state.memoryDetail.isFullscreen
+      appBar: memoryDetail.isFullscreen()
           ? null
           : AppBar(
               title: Text(
@@ -119,18 +121,11 @@ class MemoryPage extends UI {
   }
 
   Future<void> imagePicked() async {
-    final picked = await FilePicker.platform.pickFiles(
+    // ignore: unused_local_variable
+    final picked = await FilePicker.pickFiles(
       type: FileType.image,
+      // ignore: deprecated_member_use
       allowMultiple: false,
     );
-    if (picked == null) return;
-    final path = picked.files.first.path;
-    if (path != null) {
-      MemoryMedia media = MemoryMedia(
-        path: path,
-        note: 'added from details/memorydetail page',
-      );
-      dispatch(AddImageMediaToMemory(media));
-    }
   }
 }

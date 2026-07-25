@@ -11,13 +11,9 @@ import 'package:memories/features/features.dart';
 
 class MemoriesPage extends UI {
   @override
-  void init() {
-    dispatch(SubscribeToMemories());
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final listOfMemories = state.memories.memories;
+    final memoriesState = context(memoriesStateProvider);
+    final lockingMechanismState = context(lockingMechanismStateProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text('Memories'),
@@ -44,7 +40,8 @@ class MemoriesPage extends UI {
           ),
           IconButton(
             onPressed: () {
-              dispatch(LockApplicationAction());
+              lockingMechanismState.lockApplication();
+              // dispatch(LockApplicationAction());
             },
             icon: Icon(
               Icons.lock,
@@ -67,10 +64,10 @@ class MemoriesPage extends UI {
           ),
           Expanded(
             child: ListView.builder(
-              itemCount: listOfMemories.length,
+              itemCount: memoriesState.memories().length,
               itemBuilder: (context, index) {
                 return MemoryTile(
-                  memory: listOfMemories[index],
+                  memory: memoriesState.memories()[index],
                 );
               },
             ),

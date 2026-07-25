@@ -8,10 +8,9 @@ class LockedPage extends UI {
   const LockedPage({super.key});
   @override
   Widget build(BuildContext context) {
+    final lockingMechanism = context(lockingMechanismStateProvider);
     return Scaffold(
-      backgroundColor: state.lockingMechanism.locked
-          ? Colors.red
-          : Colors.green,
+      backgroundColor: lockingMechanism.locked() ? Colors.red : Colors.green,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -20,9 +19,7 @@ class LockedPage extends UI {
           spacing: 8,
           children: [
             Icon(
-              state.lockingMechanism.locked
-                  ? Icons.lock
-                  : Icons.face_unlock_sharp,
+              lockingMechanism.locked() ? Icons.lock : Icons.face_unlock_sharp,
               size: 96,
             ),
             Text(
@@ -30,18 +27,18 @@ class LockedPage extends UI {
               style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold),
             ),
             TextFormField(
-              initialValue: state.lockingMechanism.typedPassword,
-              onChanged: (value) => dispatch(ChangeTypedPasswordAction(value)),
+              initialValue: lockingMechanism.typedPassword(),
+              onChanged: lockingMechanism.typedPassword.set,
               decoration: InputDecoration(
                 labelText: 'password',
               ),
             ),
             FilledButton(
               onPressed: () {
-                final locked = state.lockingMechanism.locked;
-                final isUnlockAllowed = state.lockingMechanism.isUnlockAllowed;
+                final locked = lockingMechanism.locked();
+                final isUnlockAllowed = lockingMechanism.isUnlockAllowed;
                 if (locked && isUnlockAllowed) {
-                  return () => dispatch(UnlockApplicationAction());
+                  return () => lockingMechanism.unlockApplication();
                 }
                 return null;
               }(),

@@ -1,19 +1,19 @@
-import 'dart:async';
-import 'package:memories/utils/architecture/services.dart';
+// import 'dart:async';
+// import 'package:memories/utils/architecture/services.dart';
 
-final repositories = <Type, Repository>{};
+// final repositories = <Type, Repository>{};
 
-abstract class Repository<T> {
-  final controller = StreamController<void>.broadcast();
-  Stream<void> watch() => controller.stream;
+// abstract class Repository<T> {
+//   final controller = StreamController<void>.broadcast();
+//   Stream<void> watch() => controller.stream;
 
-  void notifyListeners([any]) {
-    controller.add(null);
-  }
+//   void notifyListeners([any]) {
+//     controller.add(null);
+//   }
 
-  S serve<S>() => services[S] as S;
-}
+//   S serve<S>() => services[S] as S;
+// }
 
-void repository<S extends Repository>(S instance) {
-  repositories[S] = instance;
-}
+// void repository<S extends Repository>(S instance) {
+//   repositories[S] = instance;
+// }

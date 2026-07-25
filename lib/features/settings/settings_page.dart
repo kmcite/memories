@@ -7,6 +7,7 @@ class SettingsPage extends UI {
 
   @override
   Widget build(BuildContext context) {
+    final darkState = context(darkStateProvider);
     return Scaffold(
       body: CustomScrollView(
         slivers: [
@@ -18,7 +19,7 @@ class SettingsPage extends UI {
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: FilledButton(
-                  onPressed: () => toggleDark(),
+                  onPressed: () => darkState.toggleDark(),
                   child: Text('Toggle Mode'),
                 ),
               ),

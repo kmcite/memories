@@ -1,59 +1,40 @@
-import 'package:memories/business/business.dart';
 import 'package:memories/domain/api/crud_repository.dart';
 import 'package:memories/domain/models/memory.dart';
-import 'package:memories/features/features.dart';
-import 'package:redux/redux.dart';
+import 'package:memories/main.dart';
 
-class MemoryDetailState {
-  Memory? memory;
-  bool isFullscreen = false;
-}
+final memoryDetailStateProvider = provider(
+  (ref) => MemoryDetailState(
+    ref(memoriesRepositoryProvider),
+    ref(memoryMediasRepositoryProvider),
+  ),
+);
 
-MemoryDetailState memoryDetails(MemoryDetailState state, dynamic action) {
-  switch (action) {
-    case OnMemoryUpdated():
-      state.memory = action.memory;
-      return state;
-    case ToggleFullscreen():
-      state.isFullscreen = !state.isFullscreen;
-      return state;
-    case AddImageMediaToMemory():
-      final memory = state.memory;
-      if (memory != null) {
-        memory.media.add(action.image);
-        state.memory = memory;
-        dispatch(TriggerMemoryAndMediaUpdate(memory, action.image));
-      }
-      return state;
-    default:
-      return state;
+class MemoryDetailState extends Notifier {
+  late final memory = signal<Memory?>(null);
+  late final isFullscreen = signal(false);
+
+  final CrudRepository<Memory> _memoriesReposiory;
+  final CrudRepository<MemoryMedia> _memoryMediasReposiory;
+  MemoryDetailState(
+    this._memoriesReposiory,
+    this._memoryMediasReposiory,
+  );
+
+  onMemoryUpdated(Memory memory) {
+    this.memory.set(memory);
   }
-}
 
-class MemoryDetailsMW extends MiddlewareClass<Business> {
-  @override
-  call(store, action, next) {
-    next(action);
-    if (action is TriggerMemoryAndMediaUpdate) {
-      memoriesRepository.put(action.memory);
+  toggleFullscreen() {
+    isFullscreen((v) => !v);
+  }
+
+  addImageMediaToMemory(MemoryMedia media) async {
+    final _memory = memory();
+    if (_memory != null) {
+      _memory.media.add(media);
+      memory.set(_memory);
+      await _memoriesReposiory.put(_memory);
+      await _memoryMediasReposiory.put(media);
     }
   }
-}
-
-class OnMemoryUpdated {
-  final Memory memory;
-  const OnMemoryUpdated(this.memory);
-}
-
-class AddImageMediaToMemory {
-  final MemoryMedia image;
-  const AddImageMediaToMemory(this.image);
-}
-
-class ToggleFullscreen {}
-
-class TriggerMemoryAndMediaUpdate {
-  final Memory memory;
-  final MemoryMedia media;
-  const TriggerMemoryAndMediaUpdate(this.memory, this.media);
 }

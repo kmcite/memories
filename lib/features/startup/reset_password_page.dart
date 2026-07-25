@@ -1,5 +1,5 @@
 import 'package:memories/business/locking_mechanism.dart';
-import 'package:memories/business/reset_password.dart';
+// import 'package:memories/business/reset_password.dart';
 import 'package:memories/business/user_profile.dart';
 import 'package:memories/main.dart';
 import 'package:memories/features/features.dart';
@@ -9,7 +9,8 @@ class ResetPasswordPage extends UI {
 
   @override
   Widget build(context) {
-    return switch (state.resetPassword.resetStatus) {
+    final lockingMechanism = context(lockingMechanismStateProvider);
+    return switch (lockingMechanism.resetStatus()) {
       ResetPasswordStatus.verificationEmail => EmailVerification(),
       ResetPasswordStatus.newPassword => NewPasswordUI(),
       ResetPasswordStatus.success => SuccessUI(),
@@ -29,6 +30,7 @@ class SuccessUI extends UI {
 
   @override
   Widget build(BuildContext context) {
+    final lockingMechanism = context(lockingMechanismStateProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text('successful'),
@@ -49,9 +51,7 @@ class SuccessUI extends UI {
             ),
             FilledButton(
               child: Text('back to login now'),
-              onPressed: () {
-                dispatch(LockApplicationAction());
-              },
+              onPressed: lockingMechanism.lockApplication,
             ),
           ],
         ),
@@ -65,6 +65,7 @@ class NewPasswordUI extends UI {
 
   @override
   Widget build(BuildContext context) {
+    final lockingMechanism = context(lockingMechanismStateProvider);
     return Scaffold(
       appBar: AppBar(title: Text('input new password'), leading: SizedBox()),
       body: Padding(
@@ -75,33 +76,14 @@ class NewPasswordUI extends UI {
           children: [
             Text('please input your new password'),
             TextFormField(
-              initialValue: state.resetPassword.newPassword,
-              onChanged: (value) {
-                dispatch(ResetPasswordNewPasswordAction(value));
-              },
+              initialValue: lockingMechanism.newPassword(),
+              onChanged: lockingMechanism.newPassword.set,
               decoration: InputDecoration(labelText: 'new password'),
             ),
             FilledButton(
               child: Text('apply'),
-              onPressed: state.resetPassword.newPassword.isNotEmpty
-                  ? () {
-                      /// change origianl password based new password
-                      dispatch(
-                        ChangePasswordAction(
-                          state.resetPassword.newPassword,
-                        ),
-                      );
-
-                      /// clear new password
-                      dispatch(
-                        ResetPasswordNewPasswordAction(''),
-                      );
-
-                      /// change status to success
-                      dispatch(
-                        ResetPasswordStatusAction(ResetPasswordStatus.success),
-                      );
-                    }
+              onPressed: lockingMechanism.newPassword().isNotEmpty
+                  ? lockingMechanism.apply
                   : null,
             ),
           ],
@@ -116,6 +98,8 @@ class EmailVerification extends UI {
 
   @override
   Widget build(BuildContext context) {
+    final lockingMechanism = context(lockingMechanismStateProvider);
+    final userProfile = context(userProfileStateProvider);
     return Scaffold(
       appBar: AppBar(
         title: Text('Email Verification'),
@@ -130,22 +114,14 @@ class EmailVerification extends UI {
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             TextFormField(
-              initialValue: state.userProfile.verificationEmail,
-              onChanged: (value) {
-                dispatch(UserProfileEmailVerificationAction(value));
-              },
+              initialValue: userProfile.verificationEmail(),
+              onChanged: userProfile.verificationEmail.set,
               decoration: InputDecoration(label: Text('Email')),
             ),
             FilledButton(
               child: Text('Verify Email'),
-              onPressed: state.userProfile.isVerified
-                  ? () {
-                      dispatch(
-                        ResetPasswordStatusAction(
-                          ResetPasswordStatus.newPassword,
-                        ),
-                      );
-                    }
+              onPressed: userProfile.isVerified
+                  ? () => lockingMechanism.resetStatus.set(.newPassword)
                   : null,
             ),
           ],
